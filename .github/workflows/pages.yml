@@ -32,7 +32,7 @@ jobs:
 
       - name: Configure Vite base path
         run: |
-          echo "VITE_BASE_PATH=./" >> $GITHUB_ENV
+          echo "VITE_BASE=/react-snowflake-generator/" >> $GITHUB_ENV
 
       - name: Build the project
         run: npm run build
