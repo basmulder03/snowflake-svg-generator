@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { ControlPanel } from './components/Controls';
 import { Preview } from './components/Preview';
 import type { Params } from './types';
@@ -21,6 +21,34 @@ export default function App() {
     });
 
     const svgRef = useRef<SVGSVGElement | null>(null);
+
+    // Load parameters from URL on app initialization
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.toString()) {
+            const newParams: Partial<Params> = {};
+
+            // Parse URL parameters and update state
+            for (const [key, value] of urlParams.entries()) {
+                if (key in params) {
+                    const paramKey = key as keyof Params;
+                    if (typeof params[paramKey] === 'number') {
+                        (newParams as any)[paramKey] = parseFloat(value);
+                    } else if (typeof params[paramKey] === 'boolean') {
+                        (newParams as any)[paramKey] = value === 'true';
+                    } else {
+                        (newParams as any)[paramKey] = value;
+                    }
+                }
+            }
+
+            if (Object.keys(newParams).length > 0) {
+                setParams(prev => ({ ...prev, ...newParams }));
+                // Clear URL parameters after loading
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+    }, []);
 
     const { pathD, dots } = useMemo(() => {
         const arm = buildArmSegments(params);
@@ -71,6 +99,29 @@ export default function App() {
         URL.revokeObjectURL(url);
     }
 
+    function shareSnowflake() {
+        const urlParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            urlParams.set(key, String(value));
+        });
+
+        const shareUrl = `${window.location.origin}${window.location.pathname}?${urlParams.toString()}`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: `Snowflake: ${params.seed}`,
+                text: `Check out this beautiful snowflake I generated!`,
+                url: shareUrl,
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('Snowflake URL copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this URL to share your snowflake:', shareUrl);
+            });
+        }
+    }
+
     const view = params.size;
     const half = view / 2;
 
@@ -78,7 +129,7 @@ export default function App() {
         <div className="min-h-screen w-full bg-slate-900 text-slate-100 p-6">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4">
-                    <ControlPanel params={params} setParams={setParams} onRandomize={randomize} onDownload={downloadSVG} />
+                    <ControlPanel params={params} setParams={setParams} onRandomize={randomize} onDownload={downloadSVG} onShare={shareSnowflake} />
                 </div>
                 <div className="lg:col-span-8">
                     <Preview view={view} half={half} pathD={pathD} stroke={params.stroke} dots={dots} svgRef={svgRef} animate={params.animate} />
