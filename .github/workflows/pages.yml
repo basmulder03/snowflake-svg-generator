@@ -30,12 +30,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Configure Vite base path
-        run: |
-          echo "VITE_BASE=/react-snowflake-generator/" >> $GITHUB_ENV
-
       - name: Build the project
         run: npm run build
+        env:
+          VITE_BASE: /react-snowflake-generator/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
