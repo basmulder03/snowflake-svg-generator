@@ -33,7 +33,7 @@ jobs:
       - name: Build the project
         run: npm run build
         env:
-          VITE_BASE: /react-snowflake-generator/
+          VITE_BASE: /snowflake-svg-generator/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
