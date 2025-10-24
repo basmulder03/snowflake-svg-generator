@@ -20,6 +20,8 @@ export default function App() {
         size: 640,
     });
 
+    const [showSvgCode, setShowSvgCode] = useState(false);
+
     const svgRef = useRef<SVGSVGElement | null>(null);
 
     // Load parameters from URL on app initialization
@@ -122,6 +124,36 @@ export default function App() {
         }
     }
 
+    function generateSvgString() {
+        const view = params.size;
+        const half = view / 2;
+
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="${view}" height="${view}" viewBox="${-half} ${-half} ${view} ${view}">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="${-half}" y="${-half}" width="${view}" height="${view}" fill="transparent" />
+  <path d="${pathD}" stroke="#e2f3ff" stroke-width="${params.stroke}" stroke-linecap="round" filter="url(#glow)" fill="none" />
+  <circle cx="0" cy="0" r="${Math.max(1, params.stroke * 0.9)}" fill="#e2f3ff" />
+${dots.map((d) => `  <circle cx="${d.x}" cy="${d.y}" r="${d.r}" fill="#e2f3ff" />`).join('\n')}
+</svg>`;
+    }
+
+    function copySvgToClipboard() {
+        const svgString = generateSvgString();
+        navigator.clipboard.writeText(svgString).then(() => {
+            alert('SVG code copied to clipboard!');
+        }).catch(() => {
+            prompt('Copy this SVG code:', svgString);
+        });
+    }
+
     const view = params.size;
     const half = view / 2;
 
@@ -129,10 +161,29 @@ export default function App() {
         <div className="min-h-screen w-full bg-slate-900 text-slate-100 p-6">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4">
-                    <ControlPanel params={params} setParams={setParams} onRandomize={randomize} onDownload={downloadSVG} onShare={shareSnowflake} />
+                    <ControlPanel
+                        params={params}
+                        setParams={setParams}
+                        onRandomize={randomize}
+                        onDownload={downloadSVG}
+                        onShare={shareSnowflake}
+                        onCopySvg={copySvgToClipboard}
+                        showSvgCode={showSvgCode}
+                        onToggleSvgCode={() => setShowSvgCode(!showSvgCode)}
+                    />
                 </div>
                 <div className="lg:col-span-8">
-                    <Preview view={view} half={half} pathD={pathD} stroke={params.stroke} dots={dots} svgRef={svgRef} animate={params.animate} />
+                    <Preview
+                        view={view}
+                        half={half}
+                        pathD={pathD}
+                        stroke={params.stroke}
+                        dots={dots}
+                        svgRef={svgRef}
+                        animate={params.animate}
+                        showSvgCode={showSvgCode}
+                        svgString={generateSvgString()}
+                    />
                 </div>
             </div>
 

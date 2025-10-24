@@ -29,7 +29,16 @@ export function Toggle({label, checked, onChange}: { label: string; checked: boo
     );
 }
 
-export function ControlPanel({params, setParams, onRandomize, onDownload, onShare}: { params: Params; setParams: Dispatch<SetStateAction<Params>>; onRandomize: () => void; onDownload: () => void; onShare: () => void}) {
+export function ControlPanel({params, setParams, onRandomize, onDownload, onShare, onCopySvg, showSvgCode, onToggleSvgCode}: {
+    params: Params;
+    setParams: Dispatch<SetStateAction<Params>>;
+    onRandomize: () => void;
+    onDownload: () => void;
+    onShare: () => void;
+    onCopySvg: () => void;
+    showSvgCode: boolean;
+    onToggleSvgCode: () => void;
+}) {
     return (
         <div className="p-4 bg-slage-800/60 rounded-2xl shadow-xl border border-slate-700 space-y-4">
             <h1 className="text-2xl font-semibold tracking-tight">Snowflake SVG Generator</h1>
@@ -55,6 +64,13 @@ export function ControlPanel({params, setParams, onRandomize, onDownload, onShar
             <div className="flex gap-2 pt-2">
                 <button onClick={onRandomize} className="px-3 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold shadow">Randomize</button>
                 <button onClick={onShare} className="px-3 py-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-semibold shadow">Share</button>
+            </div>
+
+            <div className="flex gap-2">
+                <button onClick={onToggleSvgCode} className={`px-3 py-2 rounded-xl font-semibold shadow ${showSvgCode ? 'bg-orange-500 hover:bg-orange-400 text-white' : 'bg-slate-600 hover:bg-slate-500 text-slate-100'}`}>
+                    {showSvgCode ? 'Hide SVG' : 'Show SVG'}
+                </button>
+                <button onClick={onCopySvg} className="px-3 py-2 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-semibold shadow">Copy SVG</button>
                 <button onClick={onDownload} className="px-3 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-semibold shadow">Download SVG</button>
             </div>
         </div>
